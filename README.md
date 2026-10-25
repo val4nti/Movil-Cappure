@@ -3,7 +3,7 @@
 App Android para el control de existencias de productos e insumos médicos de **Cappucare**
 (caso semestral DSY1105 Desarrollo de Aplicaciones Móviles). Prototipo académico con datos ficticios.
 
-**Integrantes:** _(completar con nombre y apellido de ambos)_
+**Integrantes:** Valentina Morales
 
 ## Stack
 
