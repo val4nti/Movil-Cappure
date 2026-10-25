@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Carpetas que el FileProvider puede compartir. Las fotos se guardan en files/fotos/ -->
+<paths>
+    <files-path
+        name="fotos"
+        path="fotos/" />
+</paths>
