@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    // Kover: mide qué porcentaje del código recorren los tests unitarios
+    alias(libs.plugins.kover)
 }
 
 android {
@@ -13,6 +15,8 @@ android {
     defaultConfig {
         applicationId = "cl.duoc.cappucare"
         minSdk = 30
+        // 36 y no 37: Android 17 bloquea la conexión a la red local (el PC con los microservicios)
+        // para apps que apuntan a la versión 37, salvo que pidan un permiso especial.
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -59,10 +63,39 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     testImplementation(libs.junit)
+    // Para probar corrutinas y ViewModels (runTest, advanceUntilIdle, Dispatchers.setMain)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+}
+
+/*
+ * Cobertura de tests con Kover.
+ *   Reporte:   ./gradlew koverHtmlReportDebug   → app/build/reports/kover/htmlDebug/index.html
+ *   Verificar: ./gradlew koverVerifyDebug       → falla si la cobertura baja de 80 %
+ * Se mide la lógica (ViewModel, Repository, validaciones y conversiones), no las pantallas.
+ */
+kover {
+    reports {
+        filters {
+            includes {
+                classes(
+                    "cl.duoc.cappucare.utils.Validaciones",
+                    "cl.duoc.cappucare.utils.FormatoKt",
+                    "cl.duoc.cappucare.data.remote.MapeosKt",
+                    "cl.duoc.cappucare.data.repository.IndicadoresRepository*",
+                    "cl.duoc.cappucare.viewmodel.IndicadoresViewModel*"
+                )
+            }
+        }
+        verify {
+            rule {
+                minBound(80)
+            }
+        }
+    }
 }
