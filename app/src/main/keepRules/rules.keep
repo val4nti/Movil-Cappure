@@ -10,3 +10,10 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+# ---- Retrofit + Gson ----
+# En el APK de release, R8 cambia los nombres de las clases para achicarlas.
+# Gson necesita los nombres reales de los campos para leer el JSON, por eso se conservan los DTO.
+-keep class cl.duoc.cappucare.data.remote.dto.** { *; }
+# Las interfaces de Retrofit se leen por reflexión en tiempo de ejecución.
+-keep interface cl.duoc.cappucare.data.remote.*ApiService { *; }
+-keepattributes Signature, *Annotation*, InnerClasses, EnclosingMethod
