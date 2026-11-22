@@ -30,6 +30,14 @@ interface ProductoDao {
     @Query("SELECT * FROM productos WHERE codigo = :codigo LIMIT 1")
     suspend fun obtenerPorCodigo(codigo: String): ProductoEntity?
 
+    /** Todos los productos, leídos una sola vez (para conservar las fotos al sincronizar). */
+    @Query("SELECT * FROM productos")
+    suspend fun obtenerTodosUnaVez(): List<ProductoEntity>
+
+    /** Borra todos los productos (al sincronizar se reemplazan por los del servidor). */
+    @Query("DELETE FROM productos")
+    suspend fun borrarTodos()
+
     /** Cantidad de productos guardados. Se usa para saber si hay que cargar datos de ejemplo. */
     @Query("SELECT COUNT(*) FROM productos")
     suspend fun contar(): Int

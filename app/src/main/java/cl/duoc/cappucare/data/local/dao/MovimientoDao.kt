@@ -28,6 +28,10 @@ interface MovimientoDao {
     @Query("SELECT * FROM movimientos WHERE productoId = :productoId ORDER BY fecha DESC LIMIT 1")
     fun observarUltimo(productoId: Long): Flow<MovimientoEntity?>
 
+    /** Borra todo el historial local (al sincronizar se reemplaza por el del servidor). */
+    @Query("DELETE FROM movimientos")
+    suspend fun borrarTodos()
+
     @Insert
     suspend fun insertarTodos(movimientos: List<MovimientoEntity>)
 
