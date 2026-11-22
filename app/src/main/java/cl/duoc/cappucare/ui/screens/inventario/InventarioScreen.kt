@@ -43,6 +43,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.cappucare.model.FiltroInventario
 import cl.duoc.cappucare.ui.components.AvisoError
 import cl.duoc.cappucare.ui.components.AvisoStockBajo
+import cl.duoc.cappucare.ui.components.IndicadoresCard
 import cl.duoc.cappucare.ui.components.ProductoItem
 import cl.duoc.cappucare.viewmodel.InventarioViewModel
 
@@ -147,6 +148,9 @@ fun InventarioScreen(
             singleLine = true,
             shape = MaterialTheme.shapes.large
         )
+
+        // API externa: dólar y UF del día (mindicador.cl)
+        IndicadoresCard()
 
         // Aviso si no se pudo conectar con los microservicios
         AnimatedVisibility(
