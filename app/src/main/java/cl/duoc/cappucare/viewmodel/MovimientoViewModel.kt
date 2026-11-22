@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import cl.duoc.cappucare.data.local.AppDatabase
 import cl.duoc.cappucare.data.local.entity.MovimientoEntity
 import cl.duoc.cappucare.data.preferences.PreferenciasRepository
+import cl.duoc.cappucare.data.remote.ErrorServidor
 import cl.duoc.cappucare.data.repository.InventarioRepository
 import cl.duoc.cappucare.model.FormularioMovimiento
 import cl.duoc.cappucare.model.MovimientoUiState
@@ -135,7 +136,7 @@ class MovimientoViewModel(
         val form = estado.formulario
 
         viewModelScope.launch {
-            formulario.update { it.copy(guardando = true) }
+            formulario.update { it.copy(guardando = true, errorServidor = null) }
             try {
                 val actualizado = repository.registrarMovimiento(
                     MovimientoEntity(
@@ -160,10 +161,15 @@ class MovimientoViewModel(
                             "${actualizado.cantidad} ${actualizado.unidad.abreviatura}"
                     )
                 }
-            } catch (e: IllegalArgumentException) {
-                // Por ejemplo, si otra persona vendió unidades justo antes y ya no alcanza
+            } catch (e: ErrorServidor) {
                 formulario.update {
-                    it.copy(guardando = false, errores = it.errores.copy(cantidad = e.message))
+                    if (e.codigo == 400) {
+                        // Por ejemplo, si otra persona vendió unidades justo antes y ya no alcanza:
+                        // el microservicio responde 400 "No hay stock suficiente para esta salida"
+                        it.copy(guardando = false, errores = it.errores.copy(cantidad = e.message))
+                    } else {
+                        it.copy(guardando = false, errorServidor = e.message)
+                    }
                 }
             }
         }

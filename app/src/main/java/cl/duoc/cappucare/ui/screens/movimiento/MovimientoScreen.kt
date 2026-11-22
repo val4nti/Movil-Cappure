@@ -40,6 +40,7 @@ import cl.duoc.cappucare.model.TipoMovimiento
 import cl.duoc.cappucare.model.motivosPara
 import cl.duoc.cappucare.ui.components.BarraSuperior
 import cl.duoc.cappucare.ui.components.CampoTexto
+import cl.duoc.cappucare.ui.components.AvisoError
 import cl.duoc.cappucare.ui.components.MensajeExito
 import cl.duoc.cappucare.ui.components.SelectorDesplegable
 import cl.duoc.cappucare.ui.components.SelectorOpciones
@@ -161,6 +162,7 @@ fun MovimientoScreen(
                 }
             }
 
+            form.errorServidor?.let { AvisoError(mensaje = it) }
             Button(
                 onClick = { viewModel.confirmar(perfil) },
                 enabled = !form.guardando,

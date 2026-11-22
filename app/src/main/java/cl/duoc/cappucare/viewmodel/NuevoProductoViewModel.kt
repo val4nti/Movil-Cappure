@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import cl.duoc.cappucare.data.local.AppDatabase
 import cl.duoc.cappucare.data.local.entity.ProductoEntity
+import cl.duoc.cappucare.data.remote.ErrorServidor
 import cl.duoc.cappucare.data.repository.InventarioRepository
 import cl.duoc.cappucare.model.NuevoProductoUiState
 import cl.duoc.cappucare.model.Perfil
@@ -75,7 +76,7 @@ class NuevoProductoViewModel(
 
         viewModelScope.launch {
             val s = _state.value
-            _state.update { it.copy(guardando = true) }
+            _state.update { it.copy(guardando = true, errorServidor = null) }
 
             if (repository.buscarPorCodigo(s.codigo) != null) {
                 _state.update {
@@ -85,21 +86,33 @@ class NuevoProductoViewModel(
                 return@launch
             }
 
-            val id = repository.agregarProducto(
-                producto = ProductoEntity(
-                    codigo = s.codigo,
-                    nombre = s.nombre.trim(),
-                    descripcion = s.descripcion.trim(),
-                    categoria = s.categoria!!,
-                    cantidad = s.cantidad.toInt(),
-                    unidad = s.unidad!!,
-                    stockMinimo = s.minimo.toInt(),
-                    ubicacion = s.ubicacion.trim()
-                ),
-                perfil = perfil.nombre
-            )
-            _state.update { it.copy(guardando = false) }
-            onGuardado(id)
+            try {
+                // Se guarda en el microservicio de productos (y la cantidad inicial en movimientos)
+                val id = repository.agregarProducto(
+                    producto = ProductoEntity(
+                        codigo = s.codigo,
+                        nombre = s.nombre.trim(),
+                        descripcion = s.descripcion.trim(),
+                        categoria = s.categoria!!,
+                        cantidad = s.cantidad.toInt(),
+                        unidad = s.unidad!!,
+                        stockMinimo = s.minimo.toInt(),
+                        ubicacion = s.ubicacion.trim()
+                    ),
+                    perfil = perfil.nombre
+                )
+                _state.update { it.copy(guardando = false) }
+                onGuardado(id)
+            } catch (e: ErrorServidor) {
+                _state.update {
+                    if (e.codigo == 409) {
+                        // 409 Conflict: el código ya existe en el servidor
+                        it.copy(guardando = false, errores = it.errores.copy(codigo = e.message))
+                    } else {
+                        it.copy(guardando = false, errorServidor = e.message)
+                    }
+                }
+            }
         }
     }
 }

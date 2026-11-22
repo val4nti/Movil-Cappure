@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Badge
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.cappucare.model.FiltroInventario
+import cl.duoc.cappucare.ui.components.AvisoError
 import cl.duoc.cappucare.ui.components.AvisoStockBajo
 import cl.duoc.cappucare.ui.components.ProductoItem
 import cl.duoc.cappucare.viewmodel.InventarioViewModel
@@ -104,6 +106,10 @@ fun InventarioScreen(
                     Icon(Icons.Filled.Add, contentDescription = "Nuevo producto")
                 }
             }
+            // Vuelve a traer los datos desde los microservicios
+            IconButton(onClick = viewModel::actualizar, enabled = !state.sincronizando) {
+                Icon(Icons.Filled.Refresh, contentDescription = "Actualizar desde el servidor")
+            }
             IconButton(onClick = onAlertas) {
                 BadgedBox(
                     badge = {
@@ -141,6 +147,18 @@ fun InventarioScreen(
             singleLine = true,
             shape = MaterialTheme.shapes.large
         )
+
+        // Aviso si no se pudo conectar con los microservicios
+        AnimatedVisibility(
+            visible = state.errorConexion != null,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            AvisoError(
+                mensaje = state.errorConexion.orEmpty(),
+                onReintentar = viewModel::actualizar
+            )
+        }
 
         // El aviso aparece y desaparece con animación según haya o no productos bajo el mínimo
         AnimatedVisibility(

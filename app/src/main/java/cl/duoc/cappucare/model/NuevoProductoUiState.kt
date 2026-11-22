@@ -27,5 +27,6 @@ data class NuevoProductoUiState(
     val minimo: String = "",
     val ubicacion: String = "",
     val errores: NuevoProductoErrores = NuevoProductoErrores(),
-    val guardando: Boolean = false
+    val guardando: Boolean = false,
+    val errorServidor: String? = null       // error al guardar en el microservicio
 )

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import cl.duoc.cappucare.ui.components.AvisoError
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -140,6 +141,7 @@ fun NuevoProductoScreen(
             )
 
             Spacer(Modifier.height(8.dp))
+            state.errorServidor?.let { AvisoError(mensaje = it) }
             Button(
                 onClick = { viewModel.guardar(perfil, onGuardado) },
                 enabled = !state.guardando,

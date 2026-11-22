@@ -24,7 +24,8 @@ data class FormularioMovimiento(
     val soloSalidas: Boolean = false,       // true para el perfil Vendedor
     val errores: MovimientoErrores = MovimientoErrores(),
     val guardando: Boolean = false,
-    val mensajeExito: String? = null
+    val mensajeExito: String? = null,
+    val errorServidor: String? = null       // error al guardar en el microservicio
 )
 
 /**

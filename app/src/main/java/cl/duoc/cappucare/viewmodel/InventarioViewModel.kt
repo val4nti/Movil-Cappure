@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import cl.duoc.cappucare.data.local.AppDatabase
+import cl.duoc.cappucare.data.remote.ErrorServidor
 import cl.duoc.cappucare.data.repository.InventarioRepository
 import cl.duoc.cappucare.data.local.entity.estadoStock
 import cl.duoc.cappucare.model.EstadoStock
@@ -34,13 +35,17 @@ class InventarioViewModel(
     // Estados privados que solo el ViewModel modifica
     private val busqueda = MutableStateFlow("")
     private val filtro = MutableStateFlow(FiltroInventario.TODOS)
+    private val sincronizando = MutableStateFlow(true)
+    private val errorConexion = MutableStateFlow<String?>(null)
 
     /** Estado público de solo lectura que observa la pantalla. */
     val uiState: StateFlow<InventarioUiState> = combine(
         repository.productos,
         busqueda,
-        filtro
-    ) { productos, textoBusqueda, filtroActual ->
+        filtro,
+        sincronizando,
+        errorConexion
+    ) { productos, textoBusqueda, filtroActual, estaSincronizando, error ->
 
         // Productos que necesitan reposición: agotados o bajo el mínimo
         val conStockBajo = productos.filter { it.estadoStock != EstadoStock.DISPONIBLE }
@@ -62,7 +67,10 @@ class InventarioViewModel(
             filtro = filtroActual,
             totalProductos = productos.size,
             totalStockBajo = conStockBajo.size,
-            cargando = false
+            // Solo se muestra la ruedita si todavía no hay nada que mostrar
+            cargando = estaSincronizando && productos.isEmpty(),
+            sincronizando = estaSincronizando,
+            errorConexion = error
         )
     }.stateIn(
         scope = viewModelScope,
@@ -71,9 +79,25 @@ class InventarioViewModel(
     )
 
     init {
-        // La primera vez que se abre la app se carga el catálogo de ejemplo
+        // Al abrir el inventario se traen los datos de los microservicios
+        actualizar()
+    }
+
+    /**
+     * Descarga productos y movimientos desde los microservicios y actualiza Room.
+     * Si falla, la pantalla sigue mostrando lo último guardado en el teléfono y un aviso.
+     */
+    fun actualizar() {
         viewModelScope.launch {
-            repository.cargarDatosInicialesSiVacio()
+            sincronizando.value = true
+            try {
+                repository.sincronizar()
+                errorConexion.value = null
+            } catch (e: ErrorServidor) {
+                errorConexion.value = e.message
+            } finally {
+                sincronizando.value = false
+            }
         }
     }
 
