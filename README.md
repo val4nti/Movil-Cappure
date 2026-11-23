@@ -6,7 +6,7 @@ App Android para el control de existencias de productos e insumos médicos de **
 ## Integrantes
 
 - Valentina Morales
-- NOMBRE COMPAÑERA
+  
 
 ## Repositorios
 
