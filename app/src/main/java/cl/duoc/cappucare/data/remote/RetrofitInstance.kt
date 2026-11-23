@@ -13,9 +13,13 @@ import retrofit2.converter.gson.GsonConverterFactory
  */
 object RetrofitInstance {
 
+    // ⚠️ ÚNICA LÍNEA A CAMBIAR: IP del PC donde corren los microservicios.
+    // Emulador: "10.0.2.2"   |   Celular físico: la IPv4 del PC (ipconfig)
+    private const val IP_PC = "10.241.234.241"
+
     // La URL base debe terminar en "/" para que Retrofit una bien las rutas
-    private const val URL_PRODUCTOS = "http://10.0.2.2:8081/"
-    private const val URL_MOVIMIENTOS = "http://10.0.2.2:8082/"
+    private const val URL_PRODUCTOS = "http://$IP_PC:8081/"
+    private const val URL_MOVIMIENTOS = "http://$IP_PC:8082/"
 
     // API externa (de terceros, con HTTPS)
     private const val URL_MINDICADOR = "https://mindicador.cl/"
